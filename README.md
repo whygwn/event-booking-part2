@@ -255,7 +255,7 @@ npm run dev
 - Edit series forward: `PATCH /api/events/recurring/:seriesId`
 - Delete satu occurrence: `DELETE /api/events/recurring/:seriesId/occurrences/:eventId`
 - Delete future series: `DELETE /api/events/recurring/:seriesId?fromDate=YYYY-MM-DD`
-- Referensi contoh payload: section `Recurring Usage (No UI Yet)` di atas.
+- Referensi contoh payload: section `Step-by-step (tanpa UI)` di bawah berikut.
 
 ### Step-by-step (tanpa UI)
 a. Login admin dan ambil JWT token
