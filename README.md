@@ -295,6 +295,70 @@ curl -X DELETE "http://localhost:3000/api/events/recurring/<SERIES_ID>?fromDate=
   -H "Authorization: Bearer <TOKEN_ADMIN>"
 ```
 
+## Layer 4 Verification (Step-by-step)
+- Catatan: verifikasi Layer 4 recurring dijalankan via API (tanpa UI recurring khusus).
+
+1. Setup environment
+```bash
+cp .env.example .env
+```
+Pastikan terisi:
+- `DATABASE_URL` atau `DATABASE_URL_UNPOOLED`
+- `JWT_SECRET`
+
+2. Apply schema awal
+```bash
+psql "$DATABASE_URL_UNPOOLED" -f whyplan-core-schema.txt
+```
+
+3. Seed dataset baseline
+```bash
+DATABASE_URL="$DATABASE_URL_UNPOOLED" npm run seed
+```
+
+4. Jalankan server lokal
+```bash
+npm run dev
+```
+
+5. Verifikasi 4.1 Recurring API use cases
+- Create recurring series: `POST /api/events/recurring`
+- Edit/cancel satu occurrence: `PATCH /api/events/recurring/:seriesId/occurrences/:eventId`
+- Edit series forward: `PATCH /api/events/recurring/:seriesId`
+- Delete satu occurrence: `DELETE /api/events/recurring/:seriesId/occurrences/:eventId`
+- Delete future series: `DELETE /api/events/recurring/:seriesId?fromDate=YYYY-MM-DD`
+- Referensi contoh payload: section `Recurring Usage (No UI Yet)` di atas.
+
+6. Verifikasi 4.2 Comprehensive test coverage
+```bash
+npm test
+```
+Fokus hasil:
+- recurring flow: `tests/recurring.test.ts`
+- edge case cancel/waitlist/undo: `tests/edge-cases.test.ts`
+- concurrent booking: `tests/concurrent.test.ts`
+- booking logic/auth/db: file test lain di folder `tests/`
+
+7. Verifikasi build readiness
+```bash
+npm run build
+```
+
+8. Verifikasi 4.3 Performance under load
+```bash
+SEED_SCALE=large DATABASE_URL="$DATABASE_URL_UNPOOLED" npm run seed
+```
+Expected:
+- generate data besar (10.000+ event, 50.000+ booking, ribuan user)
+- endpoint browse/search tetap responsif dengan pagination
+- alur booking tetap konsisten (tidak degradasi fatal)
+
+9. Optional quick smoke checks setelah large seed
+```bash
+curl "http://localhost:3000/api/events?page=1&pageSize=20"
+curl "http://localhost:3000/api/events/smart?page=1&pageSize=20"
+```
+
 ## What You'd Improve
 1. Replace localStorage JWT with secure cookie-based auth and refresh flow.
 2. Upgrade realtime updates from polling to WebSocket/SSE.
