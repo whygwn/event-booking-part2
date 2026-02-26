@@ -223,6 +223,78 @@ SEED_SCALE=large npm run seed
 - `PATCH /api/events/recurring/:seriesId/occurrences/:eventId`
 - `DELETE /api/events/recurring/:seriesId/occurrences/:eventId`
 
+## Recurring Usage (No UI Yet)
+- Catatan: UI khusus recurring event belum sempat diimplementasikan. Fitur recurring saat ini digunakan via API.
+
+### Step-by-step (tanpa UI)
+1. Login admin dan ambil JWT token
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"admin123"}'
+```
+
+2. Buat recurring series (contoh Senin dan Rabu jam 09:00)
+```bash
+curl -X POST http://localhost:3000/api/events/recurring \
+  -H "Authorization: Bearer <TOKEN_ADMIN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title":"Morning Yoga",
+    "description":"Recurring class",
+    "location":"Bali",
+    "category":"Wellness",
+    "frequency":"weekly",
+    "weekdays":[1,3],
+    "intervalCount":1,
+    "startDate":"2026-03-01",
+    "untilDate":"2026-05-31",
+    "startTime":"09:00",
+    "endTime":"10:00",
+    "capacity":20,
+    "timezone":"UTC"
+  }'
+```
+
+3. Lihat daftar recurring series
+```bash
+curl "http://localhost:3000/api/events/recurring?page=1&pageSize=10"
+```
+
+4. Edit satu occurrence (cancel satu tanggal)
+```bash
+curl -X PATCH http://localhost:3000/api/events/recurring/<SERIES_ID>/occurrences/<EVENT_ID> \
+  -H "Authorization: Bearer <TOKEN_ADMIN>" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"cancel"}'
+```
+
+5. Edit series ke depan dari tanggal tertentu
+```bash
+curl -X PATCH http://localhost:3000/api/events/recurring/<SERIES_ID> \
+  -H "Authorization: Bearer <TOKEN_ADMIN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "effectiveDate":"2026-04-01",
+    "title":"Morning Yoga Updated",
+    "capacity":25,
+    "startTime":"08:30",
+    "endTime":"10:00"
+  }'
+```
+
+6. Hapus satu occurrence
+```bash
+curl -X DELETE http://localhost:3000/api/events/recurring/<SERIES_ID>/occurrences/<EVENT_ID> \
+  -H "Authorization: Bearer <TOKEN_ADMIN>"
+```
+
+7. Hapus seluruh future occurrences dalam satu series (past occurrence tetap)
+```bash
+curl -X DELETE "http://localhost:3000/api/events/recurring/<SERIES_ID>?fromDate=2026-04-01" \
+  -H "Authorization: Bearer <TOKEN_ADMIN>"
+```
+
 ## What You'd Improve
 1. Replace localStorage JWT with secure cookie-based auth and refresh flow.
 2. Upgrade realtime updates from polling to WebSocket/SSE.
