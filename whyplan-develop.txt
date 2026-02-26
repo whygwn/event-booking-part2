@@ -1,0 +1,105 @@
+🔹 Step 1: Scope & Core Flow
+
+    Tujuan utama: Event Booking Platform dengan PostgreSQL, mobile-only UI.
+
+    Flow dasar user:
+
+        Registrasi / login.
+
+        Browse event.
+
+        Lihat detail event + slot.
+
+        Booking spot (1–5).
+
+        Manage booking (lihat, cancel).
+
+    Admin flow:
+
+        Buat / edit / hapus event + slot.
+
+🔹 Step 2: Database Schema (Layer 1)
+
+Tabel inti:
+
+    users
+
+        id, name, email, password_hash, role
+
+    events
+
+        id, title, description, date, location, created_by
+
+    slots
+
+        id, event_id, start_time, end_time, capacity
+
+    bookings
+
+        id, user_id, slot_id, spots, status (booked/cancelled/waitlist), created_at
+
+🔹 Step 3: API Contract (Layer 1)
+
+    Auth
+
+        POST /auth/register
+
+        POST /auth/login
+
+    Events
+
+        POST /events (admin)
+
+        GET /events (browse/search/pagination)
+
+        GET /events/:id (detail)
+
+        PUT /events/:id (edit by creator)
+
+        DELETE /events/:id
+
+    Slots
+
+        POST /events/:id/slots
+
+        GET /events/:id/slots
+
+    Bookings
+
+        POST /slots/:id/book
+
+        GET /users/:id/bookings
+
+        DELETE /bookings/:id (cancel)
+
+🔹 Step 4: UI Flow (Mobile 390px)
+
+    Home → list event (search + pagination).
+
+    Event detail → slot list + kapasitas tersisa.
+
+    Booking form → pilih jumlah spot.
+
+    My bookings → upcoming + past + cancel.
+
+    Auth screens → login/register.
+
+🔹 Step 5: Seed Script Plan
+
+    Generate 300 users, 100 events, masing-masing punya slot.
+
+    Hardcode 5 skenario khusus (full slot, busy user, multi-slot, cancellation chain, conflict).
+
+    Simpan credentials user skenario di README.
+
+🔹 Step 6: Timeline Eksekusi
+
+    Jam 0–2 → Setup project, DB schema, auth.
+
+    Jam 2–4 → Event CRUD + browse/search.
+
+    Jam 4–5 → Booking + user bookings.
+
+    Jam 5–6 → Seed script + deploy demo.
+
+    Jam 6–6:30 → README + Loom recording.

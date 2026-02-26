@@ -1,0 +1,52 @@
++------------------+
+|      users       |
++------------------+
+| id (PK)          |
+| name             |
+| email (unique)   |
+| password_hash    |
+| role (user/admin)|
+| timezone         |
++------------------+
+
+        1 ────────┐
+                  │
+                  │
++-----------------▼----------------+
+|             events               |
++----------------------------------+
+| id (PK)                          |
+| title                            |
+| description                      |
+| date (UTC)                       |
+| location                         |
+| created_by (FK → users.id)       |
++----------------------------------+
+
+        1 ────────┐
+                  │
+                  │
++-----------------▼----------------+
+|             slots                |
++----------------------------------+
+| id (PK)                          |
+| event_id (FK → events.id)        |
+| start_time (UTC)                 |
+| end_time (UTC)                   |
+| capacity                         |
++----------------------------------+
+
+        1 ────────┐
+                  │
+                  │
++-----------------▼----------------+
+|            bookings              |
++----------------------------------+
+| id (PK)                          |
+| user_id (FK → users.id)          |
+| slot_id (FK → slots.id)          |
+| spots (1–5)                      |
+| status (booked/cancelled/waitlist)|
+| created_at                       |
+| updated_at                       |
++----------------------------------+
