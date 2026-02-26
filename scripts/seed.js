@@ -1,6 +1,8 @@
 
 const { Client } = require('pg');
 const bcrypt = require('bcryptjs');
+const fs = require('node:fs');
+const path = require('node:path');
 
 async function getClient() {
   const connectionString =
@@ -120,10 +122,32 @@ async function seedLargeLoadData(client, adminId, defaultPassHash) {
   console.log('Large load dataset generated: +10,000 events and +50,000 bookings.');
 }
 
+async function ensureCoreSchema(client) {
+  const requiredTables = ['users', 'events', 'slots', 'bookings'];
+  const checks = await Promise.all(
+    requiredTables.map((table) =>
+      client.query('SELECT to_regclass($1) AS exists', [`public.${table}`])
+    )
+  );
+
+  const missing = checks
+    .map((res, index) => (res.rows[0].exists ? null : requiredTables[index]))
+    .filter(Boolean);
+
+  if (missing.length === 0) return;
+
+  console.log(`Core schema missing (${missing.join(', ')}). Applying whyplan-core-schema.txt...`);
+  const schemaPath = path.resolve(__dirname, '..', 'whyplan-core-schema.txt');
+  const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+  await client.query(schemaSql);
+  console.log('Core schema applied.');
+}
+
 async function seed() {
   const client = await getClient();
   try {
     console.log('Starting seed...');
+    await ensureCoreSchema(client);
 
     console.log('Ensuring schema compatibility...');
     await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP");
