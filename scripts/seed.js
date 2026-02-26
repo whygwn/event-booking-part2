@@ -3,6 +3,24 @@ const { Client } = require('pg');
 const bcrypt = require('bcryptjs');
 
 async function getClient() {
+  const connectionString =
+    process.env.DATABASE_URL_UNPOOLED ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL;
+  const shouldUseSsl =
+    process.env.PGSSLMODE === 'require' ||
+    Boolean(connectionString && connectionString.includes('sslmode=require'));
+
+  if (connectionString) {
+    const client = new Client({
+      connectionString,
+      ...(shouldUseSsl ? { ssl: { require: true, rejectUnauthorized: false } } : {}),
+    });
+    await client.connect();
+    return client;
+  }
+
   const config = {
     user: process.env.PGUSER || 'whygwn',
     database: process.env.PGDATABASE || 'whygwn_db',
@@ -14,6 +32,7 @@ async function getClient() {
   }
   if (process.env.PGPORT) config.port = parseInt(process.env.PGPORT, 10);
   if (process.env.PGPASSWORD) config.password = process.env.PGPASSWORD;
+  if (shouldUseSsl) config.ssl = { require: true, rejectUnauthorized: false };
   const client = new Client(config);
   await client.connect();
   return client;
