@@ -3,8 +3,8 @@
 A production-style event booking application built with Next.js, PostgreSQL, and Sequelize.
 
 ## Live Links
-- Live demo: https://event-booking-demo.vercel.app
-- Loom walkthrough (3-5 min): https://loom.com/share/your-loom-id
+- Live demo: https://event-booking-part2.vercel.app/
+- Loom walkthrough (3-5 min): none
 
 ## Tech Choices
 - Next.js App Router for a single frontend + API codebase with fast iteration.
